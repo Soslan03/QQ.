@@ -103,13 +103,14 @@ public class UserDaoJDBCImpl implements UserDao {
                 person.setAge((byte) resultSet.getInt("age"));
 
                 people.add(person);
-                System.out.println(person);
+               // System.out.println(person);
+
             }
 
         } catch (SQLException | NullPointerException throwables) {
             throwables.printStackTrace();
         }
-
+        System.out.println(people);
         return people;
     }
 
