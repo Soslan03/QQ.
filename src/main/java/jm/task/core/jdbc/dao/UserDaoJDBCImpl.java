@@ -16,19 +16,21 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        try {
+        try (Statement statement = connection.createStatement()){
 
             // команда создания таблицы
             String sqlCommand = "CREATE TABLE person (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(20), lastName VARCHAR(20), age INT)";
 
-            Statement statement = connection.createStatement();
+
             // создание таблицы
             statement.executeUpdate(sqlCommand);
+            connection.commit();
 
             System.out.println("Database has been created!");
 
         } catch (Exception ex) {
             System.out.println("Connection failed...");
+
 
             System.out.println(ex);
         }
@@ -37,11 +39,12 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void dropUsersTable() {
 
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
+
+        try  (Statement statement = connection.createStatement()){
+
             String sql = "DROP TABLE person";
             statement.executeUpdate(sql);
+            connection.commit();
             System.out.println("Database dropped successfully...");
         } catch (Exception e) {
             System.out.println("Database  not found...");
@@ -54,15 +57,15 @@ public class UserDaoJDBCImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         User user = new User(name, lastName, age);
         String sql = "INSERT INTO Person (name, lastname, age) VALUES (?, ?, ? )";
-        try {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+
 
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getLastName());
             preparedStatement.setInt(3, user.getAge());
 
             preparedStatement.executeUpdate();
+
             System.out.println("User с именем –" + user.getName() + " добавлен в базу данных");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -71,14 +74,15 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        PreparedStatement preparedStatement =
-                null;
-        try {
-            preparedStatement = connection.prepareStatement("DELETE FROM Person WHERE id=?");
+
+        String sql ="DELETE FROM Person WHERE id=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
 
             preparedStatement.setLong(1, id);
 
             preparedStatement.executeUpdate();
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -89,10 +93,12 @@ public class UserDaoJDBCImpl implements UserDao {
 
         List<User> people = new ArrayList<>();
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()){
+            ;
             String SQL = "SELECT * FROM Person";
+            connection.setAutoCommit(false);
             ResultSet resultSet = statement.executeQuery(SQL);
+            connection.commit();
 
             while (resultSet.next()) {
                 User person = new User();
@@ -103,6 +109,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 person.setAge((byte) resultSet.getInt("age"));
 
                 people.add(person);
+
                // System.out.println(person);
 
             }
@@ -115,25 +122,17 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        int i = 0;
-        PreparedStatement preparedStatement =
-                null;
-        String QUERY = "SELECT id, name, lastname, age FROM Person";
-        try {
-            Statement statement = connection.createStatement();
+      String sql = "DELETE FROM Person ";
+        try (Statement statement = connection.createStatement()) {
 
-            ResultSet rs = statement.executeQuery(QUERY);
-            while (rs.next()) {
-                String sql = "DELETE FROM Person " +
-                        "WHERE" + rs.getInt("id");
-                statement.executeUpdate(sql);
+            statement.executeUpdate(sql);
+            connection.commit();
 
 
-            }
-            rs.close();
+
         } catch (SQLException e) {
             System.out.println("Table is empty");
-            ;
+
         }
 
     }
