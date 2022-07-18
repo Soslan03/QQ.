@@ -32,7 +32,7 @@ public class UserDaoHibernateImpl implements UserDao {
 //                    "  name     VARCHAR(250) DEFAULT NULL," +
 //                    "  lastname VARCHAR(250) DEFAULT NULL," +
 //                    "  age      TINYINT      DEFAULT NULL)";
-            String sqlCommand = "CREATE TABLE PERSON (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(20), lastName VARCHAR(20), age INT)";
+            String sqlCommand = "CREATE TABLE USERS (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(20), lastName VARCHAR(20), age INT)";
             session.beginTransaction();
             //session.createNativeQuery(sql);
             session.createSQLQuery(sqlCommand).executeUpdate();
@@ -48,10 +48,10 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void dropUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
-            String sql = "DROP TABLE PERSON";
+            String sql = "DROP TABLE USERS";
            session.beginTransaction();
             session.createSQLQuery(sql).executeUpdate();
-           // session.createNativeQuery("DROP TABLE IF EXISTS PERSON");
+           // session.createNativeQuery("DROP TABLE IF EXISTS USER");
             session.getTransaction().commit();
         }catch (Exception e) {
             System.out.println("Database  not found...");
@@ -63,17 +63,24 @@ public class UserDaoHibernateImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
 
         try  (Session session1 = Util.getSessionFactory().openSession()){
+            User user1 = new User(name, lastName, age);
 
-            String sql = "INSERT INTO Person (name, lastName, age) VALUES (:name, :lastName, :age )";
+           // String sql = "INSERT INTO USER (name, lastName, age) VALUES (:name, :lastName, :age )";
             session1.beginTransaction();
-            Query query = session1.createSQLQuery(sql);
-            query.setParameter("name", name);
-            query.setParameter("lastName", lastName);
-            query.setParameter("age", age);
+           // Query query = session1.createSQLQuery(sql);
+          //  query.setParameter("name", name);
+          //  query.setParameter("lastName", lastName);
+         //   query.setParameter("age", age);
 
-            query.executeUpdate();
+         //   query.executeUpdate();
+//            String hql = "insert into User (name, lastName, age) " +
+//                    "select"+  user1.getName()+ ","+ user1.getLastName()+","+ user1.getAge();
+//            int rows = session1.createQuery (hql).executeUpdate();
+//            session1.getTransaction().commit();
+            Long id = (Long) session1.save(user1);
  //         transaction.commit();
-            session1.getTransaction().commit();
+
+      session1.getTransaction().commit();
             System.out.println("User с именем –" + name + " добавлен в базу данных");
         }catch (Throwable throwables) {
             System.out.println(throwables);
@@ -128,7 +135,7 @@ public class UserDaoHibernateImpl implements UserDao {
 //            User user = (User) it.next();
 //            System.out.println(user.toString());
 //        }
-        String SQL = "SELECT id, name, lastName, age FROM Person";
+        String SQL = "SELECT id, name, lastName, age FROM USERS";
         try (Session session1 = Util.getSessionFactory().openSession()) {
             session1.beginTransaction();
            //peaple = session1.createSQLQuery(SQL).stream().toList();
@@ -170,7 +177,7 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void cleanUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
-            String SQL = "DELETE FROM PERSON";
+            String SQL = "DELETE FROM USERS";
             session.beginTransaction();
             //session.delete(SQL);
             session.createSQLQuery(SQL).executeUpdate();

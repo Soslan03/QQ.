@@ -16,39 +16,59 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        try (Statement statement = connection.createStatement()){
+        try (Connection connection = Util.getConnection()) {
+            connection.setAutoCommit(false);
 
-            // команда создания таблицы
-            String sqlCommand = "CREATE TABLE person (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(20), lastName VARCHAR(20), age INT)";
+            try (Statement statement = connection.createStatement()) {
 
-
-            // создание таблицы
-            statement.executeUpdate(sqlCommand);
-            connection.commit();
-
-            System.out.println("Database has been created!");
-
-        } catch (Exception ex) {
-            System.out.println("Connection failed...");
+                // команда создания таблицы
+                String sqlCommand = "CREATE TABLE Person (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(20), lastName VARCHAR(20), age INT)";
 
 
-            System.out.println(ex);
+                // создание таблицы
+                statement.executeUpdate(sqlCommand);
+                connection.commit();
+                connection.setAutoCommit(true);
+
+                System.out.println("Database has been created!");
+
+            } catch (Exception ex) {
+
+                connection.rollback();
+                connection.setAutoCommit(true);
+
+                System.out.println("Connection failed...");
+
+
+                System.out.println(ex);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
     }
 
     public void dropUsersTable() {
 
+        try (Connection connection = Util.getConnection()) {
+            connection.setAutoCommit(false);
 
-        try  (Statement statement = connection.createStatement()){
 
-            String sql = "DROP TABLE person";
-            statement.executeUpdate(sql);
-            connection.commit();
-            System.out.println("Database dropped successfully...");
-        } catch (Exception e) {
-            System.out.println("Database  not found...");
-            System.out.println(e);
+            try (Statement statement = connection.createStatement()) {
+
+                String sql = "DROP TABLE person";
+                statement.executeUpdate(sql);
+                connection.commit();
+                connection.setAutoCommit(true);
+                System.out.println("Database dropped successfully...");
+            } catch (Exception e) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+                System.out.println("Database  not found...");
+                System.out.println(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
 
@@ -57,34 +77,53 @@ public class UserDaoJDBCImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         User user = new User(name, lastName, age);
         String sql = "INSERT INTO Person (name, lastname, age) VALUES (?, ?, ? )";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+        try (Connection connection = Util.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getLastName());
-            preparedStatement.setInt(3, user.getAge());
+                preparedStatement.setString(1, user.getName());
+                preparedStatement.setString(2, user.getLastName());
+                preparedStatement.setInt(3, user.getAge());
 
-            preparedStatement.executeUpdate();
 
-            System.out.println("User с именем –" + user.getName() + " добавлен в базу данных");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+                preparedStatement.executeUpdate();
+                connection.commit();
+                connection.setAutoCommit(true);
+
+                System.out.println("User с именем –" + user.getName() + " добавлен в базу данных");
+            } catch (SQLException throwables) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+                throwables.printStackTrace();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
     }
 
     public void removeUserById(long id) {
 
-        String sql ="DELETE FROM Person WHERE id=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        String sql = "DELETE FROM Person WHERE id=?";
+        try (Connection connection = Util.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 
-            preparedStatement.setLong(1, id);
+                preparedStatement.setLong(1, id);
 
-            preparedStatement.executeUpdate();
+                preparedStatement.executeUpdate();
+                connection.commit();
+                connection.setAutoCommit(true);
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            } catch (SQLException throwables) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+                throwables.printStackTrace();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
     }
@@ -93,12 +132,12 @@ public class UserDaoJDBCImpl implements UserDao {
 
         List<User> people = new ArrayList<>();
 
-        try (Statement statement = connection.createStatement()){
-            ;
+        try (Statement statement = connection.createStatement()) {
+
             String SQL = "SELECT * FROM Person";
-            connection.setAutoCommit(false);
+
             ResultSet resultSet = statement.executeQuery(SQL);
-            connection.commit();
+
 
             while (resultSet.next()) {
                 User person = new User();
@@ -110,7 +149,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
                 people.add(person);
 
-               // System.out.println(person);
+                // System.out.println(person);
 
             }
 
@@ -122,17 +161,24 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-      String sql = "DELETE FROM Person ";
-        try (Statement statement = connection.createStatement()) {
+        String sql = "DELETE FROM Person ";
+        try (Connection connection = Util.getConnection()) {
+            connection.setAutoCommit(false);
 
-            statement.executeUpdate(sql);
-            connection.commit();
+            try (Statement statement = connection.createStatement()) {
+
+                statement.executeUpdate(sql);
+                connection.commit();
 
 
+            } catch (SQLException e) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+                System.out.println("Table is empty");
 
+            }
         } catch (SQLException e) {
-            System.out.println("Table is empty");
-
+            throw new RuntimeException(e);
         }
 
     }

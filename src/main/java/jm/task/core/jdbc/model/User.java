@@ -1,12 +1,18 @@
 package jm.task.core.jdbc.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
-@Table
+@Entity
+@Table(name = "USERS")
+
 public class User {
     @Id
+   //(strategy= GenerationType.SEQUENCE)
+         //   generator="Users_seq")
+   // @SequenceGenerator(name="Users_seq",
+     //       sequenceName="SEQ_USER", allocationSize=10)
+    @Column(name="id")//, updatable=false, nullable=false)
+    @GeneratedValue
     private Long id;
 
     @Column
