@@ -17,9 +17,9 @@ public class Main {
     public static void main(String[] args) {
         // реализуйте алгоритм здесь
         //       Util.getConnection();
-    Connection connection = Util.getConnection();
-//             Session session = Util.getSessionFactory().openSession();
-//              session.beginTransaction();
+        //   Connection connection = Util.getConnection();
+        Session session = Util.getSessionFactory().openSession();
+        session.beginTransaction();
         UserServiceImpl userDao = new UserServiceImpl();
 
         userDao.createUsersTable();
@@ -31,19 +31,19 @@ public class Main {
         userDao.saveUser("Name4", "LastName4", (byte) 38);
         userDao.removeUserById(3);
         users = userDao.getAllUsers();
-  //      System.out.println(users);
+//      System.out.println(users);
         userDao.cleanUsersTable();
         userDao.dropUsersTable();
 
-//              session.close();
-//
-//
-//              Util.shutdown();
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        session.close();
+
+
+        Util.shutdown();
+//        try {
+//            connection.close();
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
 
     }
 }

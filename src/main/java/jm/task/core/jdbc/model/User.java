@@ -1,9 +1,11 @@
 package jm.task.core.jdbc.model;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 
+@Transactional
 @Entity
-@Table(name = "USERS")
+@Table(name = "User")
 
 public class User {
     @Id
@@ -12,16 +14,16 @@ public class User {
    // @SequenceGenerator(name="Users_seq",
      //       sequenceName="SEQ_USER", allocationSize=10)
     @Column(name="id")//, updatable=false, nullable=false)
-    @GeneratedValue
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(name="name")
     private String name;
 
-    @Column
+    @Column(name="lastName")
     private String lastName;
 
-    @Column
+    @Column(name="age")
     private Byte age;
 
     public User() {
