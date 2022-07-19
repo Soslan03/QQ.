@@ -15,116 +15,132 @@ public class UserDaoJDBCImpl implements UserDao {
 
     }
 
-    public void createUsersTable() {
-        try (Connection connection = Util.getConnection()) {
-            connection.setAutoCommit(false);
+    public void createUsersTable() throws SQLException {
+        Connection connection = Util.getConnection();
+        connection.setAutoCommit(false);
 
-            try (Statement statement = connection.createStatement()) {
+        try (Statement statement = connection.createStatement()) {
 
-                // команда создания таблицы
-                String sqlCommand = "CREATE TABLE Person (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(20), lastName VARCHAR(20), age INT)";
-
-
-                // создание таблицы
-                statement.executeUpdate(sqlCommand);
-                connection.commit();
-                connection.setAutoCommit(true);
-
-                System.out.println("Database has been created!");
-
-            } catch (Exception ex) {
-
-                connection.rollback();
-                connection.setAutoCommit(true);
-
-                System.out.println("Connection failed...");
+            // команда создания таблицы
+            String sqlCommand = "CREATE TABLE Person (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(20), lastName VARCHAR(20), age INT)";
 
 
-                System.out.println(ex);
-            }
+            // создание таблицы
+            statement.executeUpdate(sqlCommand);
+            connection.commit();
+
+            System.out.println("Database has been created!");
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public void dropUsersTable() {
-
-        try (Connection connection = Util.getConnection()) {
-            connection.setAutoCommit(false);
-
-
-            try (Statement statement = connection.createStatement()) {
-
-                String sql = "DROP TABLE person";
-                statement.executeUpdate(sql);
-                connection.commit();
-                connection.setAutoCommit(true);
-                System.out.println("Database dropped successfully...");
-            } catch (Exception e) {
+            if (connection != null) {
                 connection.rollback();
-                connection.setAutoCommit(true);
-                System.out.println("Database  not found...");
-                System.out.println(e);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+            e.printStackTrace();
+
+        } finally {
+            connection.setAutoCommit(true);
+            if (connection != null) {
+                connection.close();
+            }
         }
 
 
     }
 
-    public void saveUser(String name, String lastName, byte age) {
+    public void dropUsersTable() throws SQLException {
+
+        Connection connection = Util.getConnection();
+        connection.setAutoCommit(false);
+
+
+        try (Statement statement = connection.createStatement()) {
+
+            String sql = "DROP TABLE person";
+            statement.executeUpdate(sql);
+            connection.commit();
+
+            System.out.println("Database dropped successfully...");
+        } catch (SQLException e) {
+            if (connection != null) {
+                connection.rollback();
+            }
+
+            e.printStackTrace();
+
+        } finally {
+            connection.setAutoCommit(true);
+            if (connection != null) {
+                connection.close();
+            }
+        }
+
+
+    }
+
+    public void saveUser(String name, String lastName, byte age) throws SQLException {
         User user = new User(name, lastName, age);
         String sql = "INSERT INTO Person (name, lastname, age) VALUES (?, ?, ? )";
-        try (Connection connection = Util.getConnection()) {
-            connection.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        Connection connection = Util.getConnection();
+        connection.setAutoCommit(false);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 
-                preparedStatement.setString(1, user.getName());
-                preparedStatement.setString(2, user.getLastName());
-                preparedStatement.setInt(3, user.getAge());
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getLastName());
+            preparedStatement.setInt(3, user.getAge());
 
 
-                preparedStatement.executeUpdate();
-                connection.commit();
-                connection.setAutoCommit(true);
+            preparedStatement.executeUpdate();
+            connection.commit();
 
-                System.out.println("User с именем –" + user.getName() + " добавлен в базу данных");
-            } catch (SQLException throwables) {
-                connection.rollback();
-                connection.setAutoCommit(true);
-                throwables.printStackTrace();
-            }
+
+            System.out.println("User с именем –" + user.getName() + " добавлен в базу данных");
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (connection != null) {
+                connection.rollback();
+            }
+
+            e.printStackTrace();
+
+        } finally {
+            connection.setAutoCommit(true);
+            if (connection != null) {
+                connection.close();
+            }
         }
+
 
     }
 
-    public void removeUserById(long id) {
+    public void removeUserById(long id) throws SQLException {
 
         String sql = "DELETE FROM Person WHERE id=?";
-        try (Connection connection = Util.getConnection()) {
-            connection.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        Connection connection = Util.getConnection();
+        connection.setAutoCommit(false);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 
-                preparedStatement.setLong(1, id);
+            preparedStatement.setLong(1, id);
 
-                preparedStatement.executeUpdate();
-                connection.commit();
-                connection.setAutoCommit(true);
+            preparedStatement.executeUpdate();
+            connection.commit();
 
-            } catch (SQLException throwables) {
-                connection.rollback();
-                connection.setAutoCommit(true);
-                throwables.printStackTrace();
-            }
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (connection != null) {
+                connection.rollback();
+            }
+
+            e.printStackTrace();
+
+        } finally {
+            connection.setAutoCommit(true);
+            if (connection != null) {
+                connection.close();
+            }
         }
+
 
     }
 
@@ -155,31 +171,37 @@ public class UserDaoJDBCImpl implements UserDao {
 
         } catch (SQLException | NullPointerException throwables) {
             throwables.printStackTrace();
+
         }
         System.out.println(people);
         return people;
     }
 
-    public void cleanUsersTable() {
+    public void cleanUsersTable() throws SQLException {
         String sql = "DELETE FROM Person ";
-        try (Connection connection = Util.getConnection()) {
+
+
+        try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
-
-            try (Statement statement = connection.createStatement()) {
-
-                statement.executeUpdate(sql);
-                connection.commit();
+            statement.executeUpdate(sql);
+            connection.commit();
+            System.out.println("the table is cleared");
 
 
-            } catch (SQLException e) {
-                connection.rollback();
-                connection.setAutoCommit(true);
-                System.out.println("Table is empty");
-
-            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (connection != null) {
+                connection.rollback();
+            }
+
+            System.out.println("Table is empty");
+
+        } finally {
+            connection.setAutoCommit(true);
+            if (connection != null) {
+                connection.close();
+            }
         }
+
 
     }
 }

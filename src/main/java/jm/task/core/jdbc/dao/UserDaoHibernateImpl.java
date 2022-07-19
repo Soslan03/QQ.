@@ -16,6 +16,7 @@ import java.util.List;
 public class UserDaoHibernateImpl implements UserDao {
 
     // private static Session session = Util.getSessionFactory().openSession();
+    Transaction transaction = null;
 
 
     SessionFactory sessionFactory = new Util().getSessionFactory();
@@ -26,7 +27,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        Transaction transaction = null;
+
         try (Session session = Util.getSessionFactory().openSession()) {
 
 
@@ -71,12 +72,12 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Transaction transaction = null;
 
-        try (Session session1 = Util.getSessionFactory().openSession()) {
 
-            transaction = session1.beginTransaction();
-            session1.save(new User(name, lastName, age));
+        try (Session session = Util.getSessionFactory().openSession()) {
+
+            transaction = session.beginTransaction();
+            session.save(new User(name, lastName, age));
             transaction.commit();
             System.out.println("User с именем –" + name + " добавлен в базу данных");
         } catch (Throwable throwables) {
@@ -92,7 +93,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        Transaction transaction = null;
+
         try (Session session = Util.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
             User user = (User) session.get(User.class, id);
@@ -132,7 +133,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-        Transaction transaction = null;
+
         try (Session session = Util.getSessionFactory().openSession()) {
             String SQL = "DELETE FROM USER";
             transaction = session.beginTransaction();

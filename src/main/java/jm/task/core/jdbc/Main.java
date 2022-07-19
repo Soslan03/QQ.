@@ -17,33 +17,46 @@ public class Main {
     public static void main(String[] args) {
         // реализуйте алгоритм здесь
         //       Util.getConnection();
-        //   Connection connection = Util.getConnection();
-        Session session = Util.getSessionFactory().openSession();
-        session.beginTransaction();
-        UserServiceImpl userDao = new UserServiceImpl();
+        Connection connection = null;
+        Session session = null;
+         try {
+             //   session = Util.getSessionFactory().openSession();
+             //  session.beginTransaction();
+               connection = Util.getConnection();
+             UserServiceImpl userDao = new UserServiceImpl();
 
-        userDao.createUsersTable();
+             userDao.createUsersTable();
 
-        List<User> users = new ArrayList<>();
-        userDao.saveUser("Name1", "LastName1", (byte) 20);
-        userDao.saveUser("Name2", "LastName2", (byte) 25);
-        userDao.saveUser("Name3", "LastName3", (byte) 31);
-        userDao.saveUser("Name4", "LastName4", (byte) 38);
-        userDao.removeUserById(3);
-        users = userDao.getAllUsers();
+             List<User> users = new ArrayList<>();
+             userDao.saveUser("Name1", "LastName1", (byte) 20);
+             userDao.saveUser("Name2", "LastName2", (byte) 25);
+             userDao.saveUser("Name3", "LastName3", (byte) 31);
+             userDao.saveUser("Name4", "LastName4", (byte) 38);
+             userDao.removeUserById(3);
+             users = userDao.getAllUsers();
 //      System.out.println(users);
-        userDao.cleanUsersTable();
-        userDao.dropUsersTable();
+             userDao.cleanUsersTable();
+             userDao.dropUsersTable();
+         } catch (SQLException e) {
+             throw new RuntimeException(e);
+         }finally {
+             //session.close();
+             if (connection!=null) {
+                 try {
+                     connection.close();
+                 } catch (SQLException e) {
+                     throw new RuntimeException(e);
+                 }
+             }
+         }
 
-        session.close();
 
 
-        Util.shutdown();
-//        try {
-//            connection.close();
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
+
+     //   Util.shutdown();
+
+
+
 
     }
 }
