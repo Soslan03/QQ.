@@ -20,9 +20,9 @@ public class Main {
         Connection connection = null;
         Session session = null;
          try {
-             //   session = Util.getSessionFactory().openSession();
-             //  session.beginTransaction();
-               connection = Util.getConnection();
+           session = Util.getSessionFactory().openSession();
+           session.beginTransaction();
+      //         connection = Util.getConnection();
              UserServiceImpl userDao = new UserServiceImpl();
 
              userDao.createUsersTable();
@@ -38,22 +38,22 @@ public class Main {
              userDao.cleanUsersTable();
              userDao.dropUsersTable();
          } catch (SQLException e) {
-             throw new RuntimeException(e);
+             e.printStackTrace();
          }finally {
-             //session.close();
-             if (connection!=null) {
-                 try {
-                     connection.close();
-                 } catch (SQLException e) {
-                     throw new RuntimeException(e);
-                 }
-             }
+           session.close();
+//             if (connection!=null) {
+//                 try {
+//                     connection.close();
+//                 } catch (SQLException e) {
+//                     throw new RuntimeException(e);
+//                 }
+//             }
          }
 
 
 
 
-     //   Util.shutdown();
+     //Util.shutdown();
 
 
 

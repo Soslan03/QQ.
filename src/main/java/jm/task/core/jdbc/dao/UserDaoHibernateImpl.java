@@ -31,7 +31,7 @@ public class UserDaoHibernateImpl implements UserDao {
         try (Session session = Util.getSessionFactory().openSession()) {
 
 
-            String sqlCommand = "CREATE TABLE User (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(20), lastName VARCHAR(20), age INT)";
+            String sqlCommand = "CREATE TABLE IF NOT EXISTS User (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(20), lastName VARCHAR(20), age INT)";
             transaction = session.beginTransaction();
 
             session.createSQLQuery(sqlCommand).executeUpdate();
@@ -39,14 +39,11 @@ public class UserDaoHibernateImpl implements UserDao {
             transaction.commit();
 
         } catch (Exception ex) {
-            try {
+            if (transaction != null) {
                 transaction.rollback();
-            } catch (Exception e) {
-                System.out.println("The table has already been created ");
             }
-            System.out.println("The table has already been created");
 
-            System.out.println(ex);
+            ex.printStackTrace();
         }
     }
 
@@ -54,19 +51,19 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         Transaction transaction = null;
         try (Session session = Util.getSessionFactory().openSession()) {
-            String sql = "DROP TABLE User";
+            String sql = "DROP TABLE IF EXISTS User";
             transaction = session.beginTransaction();
             session.createSQLQuery(sql).executeUpdate();
 
             transaction.commit();
         } catch (Exception e) {
-            try {
+
+            if (transaction != null) {
                 transaction.rollback();
-            } catch (Exception exception) {
-                System.out.println("Database not found");
             }
-            System.out.println("Database  not found...");
-            System.out.println(e);
+
+
+            e.printStackTrace();
         }
     }
 
@@ -81,10 +78,8 @@ public class UserDaoHibernateImpl implements UserDao {
             transaction.commit();
             System.out.println("User с именем –" + name + " добавлен в базу данных");
         } catch (Throwable throwables) {
-            try {
+            if (transaction != null) {
                 transaction.rollback();
-            } catch (Exception e) {
-                System.out.println("Упс");
             }
             System.out.println(throwables);
         }
@@ -101,10 +96,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
             transaction.commit();
         } catch (Exception throwables) {
-            try {
+            if (transaction != null) {
                 transaction.rollback();
-            } catch (Exception e) {
-                System.out.println("Упс");
             }
             System.out.println(throwables);
         }
@@ -116,10 +109,10 @@ public class UserDaoHibernateImpl implements UserDao {
         List<User> people = new ArrayList<>();
 
         String SQL = "FROM User";//""SELECT id, name, lastName, age FROM USERS";
-        try (Session session1 = Util.getSessionFactory().openSession()) {
-            session1.beginTransaction();
+        try (Session session = Util.getSessionFactory().openSession()) {
+            session.beginTransaction();
 
-            people = session1.createQuery(SQL).list();
+            people = session.createQuery(SQL).list();
 
 
         } catch (Exception e) {
@@ -141,12 +134,13 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery(SQL).executeUpdate();
             transaction.commit();
         } catch (Exception throwables) {
-            try {
+
+            if (transaction != null) {
                 transaction.rollback();
-            } catch (Exception e) {
-                System.out.println("Упс");
             }
-            System.out.println(throwables);
+
+
+            throwables.printStackTrace();
         }
     }
 }
